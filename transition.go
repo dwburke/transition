@@ -42,11 +42,18 @@ type StateMachine struct {
 	initialState string
 	states       map[string]*State
 	events       map[string]*Event
+	save         func(value interface{}, tx *gorm.DB) error
 }
 
 // Initial define the initial state
 func (sm *StateMachine) Initial(name string) *StateMachine {
 	sm.initialState = name
+	return sm
+}
+
+// Save register a Save hook for State
+func (sm *StateMachine) Save(fc func(value interface{}, tx *gorm.DB) error) *StateMachine {
+	sm.save = fc
 	return sm
 }
 
@@ -137,6 +144,11 @@ func (sm *StateMachine) Trigger(name string, value Stater, tx *gorm.DB, notes ..
 			}
 
 			if newTx != nil {
+
+				if sm.save != nil {
+					sm.save(value, tx)
+				}
+
 				scope := newTx.NewScope(value)
 				log := StateChangeLog{
 					ReferTable: scope.TableName(),
