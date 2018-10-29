@@ -67,6 +67,19 @@ cancellEvent.To("paid_cancelled").From("paid").After(func(order interface{}, tx 
 }})
 ```
 
+
+### Save State changes
+
+Defive a Save() function if you want state changes to be saved.
+
+```
+    OrderStateMachine.Save(func(order_interface interface{}, tx *gorm.DB) error {
+        order, _ := order_interface.(*Order)
+        return tx.Save(&order).Error
+    })
+```
+
+
 ### Trigger an Event
 
 ```go
