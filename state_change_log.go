@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/jinzhu/gorm"
-	"github.com/qor/admin"
-	"github.com/qor/audited"
-	"github.com/qor/qor/resource"
-	"github.com/qor/roles"
+	//"github.com/qor/admin"
+	//"github.com/qor/audited"
+	//"github.com/qor/qor/resource"
+	//"github.com/qor/roles"
 )
 
 // StateChangeLog a model that used to keep state change logs
@@ -19,7 +19,7 @@ type StateChangeLog struct {
 	From       string
 	To         string
 	Note       string `sql:"size:1024"`
-	audited.AuditedModel
+	//audited.AuditedModel
 }
 
 // GenerateReferenceKey generate reference key used for change log
@@ -49,12 +49,12 @@ func GetStateChangeLogs(model interface{}, db *gorm.DB) []StateChangeLog {
 }
 
 // ConfigureQorResource used to configure transition for qor admin
-func (stageChangeLog *StateChangeLog) ConfigureQorResource(res resource.Resourcer) {
-	if res, ok := res.(*admin.Resource); ok {
-		if res.Permission == nil {
-			res.Permission = roles.Deny(roles.Update, roles.Anyone).Deny(roles.Create, roles.Anyone)
-		} else {
-			res.Permission = res.Permission.Deny(roles.Update, roles.Anyone).Deny(roles.Create, roles.Anyone)
-		}
-	}
-}
+//func (stageChangeLog *StateChangeLog) ConfigureQorResource(res resource.Resourcer) {
+//if res, ok := res.(*admin.Resource); ok {
+//if res.Permission == nil {
+//res.Permission = roles.Deny(roles.Update, roles.Anyone).Deny(roles.Create, roles.Anyone)
+//} else {
+//res.Permission = res.Permission.Deny(roles.Update, roles.Anyone).Deny(roles.Create, roles.Anyone)
+//}
+//}
+//}
