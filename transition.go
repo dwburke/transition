@@ -5,9 +5,6 @@ import (
 	"strings"
 
 	"github.com/jinzhu/gorm"
-	"github.com/qor/admin"
-	"github.com/qor/qor/resource"
-	"github.com/qor/roles"
 )
 
 // Transition is a struct, embed it in your struct to enable state machine for the struct
@@ -45,11 +42,18 @@ type StateMachine struct {
 	initialState string
 	states       map[string]*State
 	events       map[string]*Event
+	save         func(value interface{}, tx *gorm.DB) error
 }
 
 // Initial define the initial state
 func (sm *StateMachine) Initial(name string) *StateMachine {
 	sm.initialState = name
+	return sm
+}
+
+// Save register a Save hook for State
+func (sm *StateMachine) Save(fc func(value interface{}, tx *gorm.DB) error) *StateMachine {
+	sm.save = fc
 	return sm
 }
 
@@ -140,6 +144,11 @@ func (sm *StateMachine) Trigger(name string, value Stater, tx *gorm.DB, notes ..
 			}
 
 			if newTx != nil {
+
+				if sm.save != nil {
+					sm.save(value, tx)
+				}
+
 				scope := newTx.NewScope(value)
 				log := StateChangeLog{
 					ReferTable: scope.TableName(),
@@ -213,29 +222,4 @@ func (transition *EventTransition) Before(fc func(value interface{}, tx *gorm.DB
 func (transition *EventTransition) After(fc func(value interface{}, tx *gorm.DB) error) *EventTransition {
 	transition.afters = append(transition.afters, fc)
 	return transition
-}
-
-// ConfigureQorResource used to configure transition for qor admin
-func (transition *Transition) ConfigureQorResource(res resource.Resourcer) {
-	if res, ok := res.(*admin.Resource); ok {
-		if meta := res.GetMeta("State"); meta.Permission == nil {
-			meta.Permission = roles.Deny(roles.Update, roles.Anyone).Deny(roles.Create, roles.Anyone)
-		}
-
-		res.OverrideIndexAttrs(func() {
-			res.IndexAttrs(res.IndexAttrs(), "-StateChangeLogs")
-		})
-
-		res.OverrideShowAttrs(func() {
-			res.ShowAttrs(res.ShowAttrs(), "-StateChangeLogs")
-		})
-
-		res.OverrideNewAttrs(func() {
-			res.NewAttrs(res.NewAttrs(), "-StateChangeLogs")
-		})
-
-		res.OverrideEditAttrs(func() {
-			res.EditAttrs(res.EditAttrs(), "-StateChangeLogs")
-		})
-	}
 }

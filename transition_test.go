@@ -6,9 +6,8 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
-
-	"github.com/qor/qor/test/utils"
-	"github.com/qor/transition"
+	//"github.com/qor/qor/test/utils"
+	//"github.com/qor/transition"
 )
 
 type Order struct {

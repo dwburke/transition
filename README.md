@@ -4,7 +4,7 @@ Transition is a [Golang](http://golang.org/) [*state machine*](https://en.wikipe
 
 it can be used standalone, but it integrates nicely with [GORM](https://github.com/jinzhu/gorm) models. When integrated with [GORM](https://github.com/jinzhu/gorm), it will also store state change logs in the database automatically.
 
-[![GoDoc](https://godoc.org/github.com/qor/transition?status.svg)](https://godoc.org/github.com/qor/transition)
+[![GoDoc](https://godoc.org/github.com/dwburke/transition?status.svg)](https://godoc.org/github.com/dwburke/transition)
 
 # Usage
 
@@ -13,7 +13,7 @@ it can be used standalone, but it integrates nicely with [GORM](https://github.c
 Embed `transition.Transition` into your struct, it will enable the state machine feature for the struct:
 
 ```go
-import "github.com/qor/transition"
+import "github.com/dwburke/transition"
 
 type Order struct {
   ID uint
@@ -66,6 +66,19 @@ cancellEvent.To("paid_cancelled").From("paid").After(func(order interface{}, tx 
   // Refund
 }})
 ```
+
+
+### Save State changes
+
+Defive a Save() function if you want state changes to be saved.
+
+```
+    OrderStateMachine.Save(func(order_interface interface{}, tx *gorm.DB) error {
+        order, _ := order_interface.(*Order)
+        return tx.Save(&order).Error
+    })
+```
+
 
 ### Trigger an Event
 
